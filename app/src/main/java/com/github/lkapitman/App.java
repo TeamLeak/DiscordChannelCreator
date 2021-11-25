@@ -1,7 +1,7 @@
 package com.github.lkapitman;
 
 public class App {
-    
+
     public String getGreeting() {
         return "Hello World!";
     }
