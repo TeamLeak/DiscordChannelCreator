@@ -10,13 +10,10 @@ public class PingCommand implements MessageCreateListener {
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        final String[] args = event.getMessage().getContent().split("\\s");
 
-        try {
-            if (event.getMessage().getContent().contains(new StringBuffer(";ping")))
-                event.getChannel().sendMessage("Pong! " + args[1]);
-        } catch (Exception e) {
+        if (event.getMessage().getContent().startsWith(";ping")) {
             event.getChannel().sendMessage("Pong!");
+
         }
     }
 
