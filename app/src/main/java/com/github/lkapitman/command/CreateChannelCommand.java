@@ -7,6 +7,8 @@ import org.javacord.api.entity.channel.ServerTextChannelBuilder;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannelBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
@@ -20,60 +22,71 @@ public class CreateChannelCommand implements MessageCreateListener {
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        if (event.getMessage().getContent().equalsIgnoreCase(";create")) {
-            final String[] args = event.getMessage().getContent().split("\\s");
+        if (hasRole(event.getMessageAuthor().asUser().get(), event.getServer().get())) {
+            if (event.getMessage().getContent().equalsIgnoreCase(";create")) {
 
-            if (args[0].equalsIgnoreCase(";create")) {
-                if (!(args.length > 2)) {
-                    EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle("Ошибка!")
-                            .setDescription("Неправильное использование!")
-                            .setAuthor("Manager")
-                            .addField("Использование", ";create <name> <text/voice> <category>")
-                            .setColor(Color.RED)
-                            .setFooter("Vladimir Putin Company. 2021");
+                final String[] args = event.getMessage().getContent().split("\\s");
 
-                    event.getChannel().sendMessage(embed);
-                    return;
-                } else {
-                    type = args[2];
-                    category = args[3];
-                    name = args[1];
+                if (args[0].equalsIgnoreCase(";create")) {
+                    if (!(args.length > 2)) {
+                        EmbedBuilder embed = new EmbedBuilder()
+                                .setTitle("Ошибка!")
+                                .setDescription("Неправильное использование!")
+                                .setAuthor("Manager")
+                                .addField("Использование", ";create <name> <text/voice> <category>")
+                                .setColor(Color.RED)
+                                .setFooter("Vladimir Putin Company. 2021");
+
+                        event.getChannel().sendMessage(embed);
+                        return;
+                    } else {
+                        type = args[2];
+                        category = args[3];
+                        name = args[1];
+                    }
                 }
-            }
 
 
-            if (App.channelCategory(category) == null) {
-                category = "БЕСЕДКА";
-            }
-
-            switch (type) {
-                case "voice" -> {
-                    ServerVoiceChannel voice = new ServerVoiceChannelBuilder(event.getServer().get()).setName(name).setCategory(App.channelCategory(category)).create().join();
-
-                    event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsup:"));
+                if (App.channelCategory(category) == null) {
+                    category = "БЕСЕДКА";
                 }
-                case "text" -> {
-                    ServerTextChannel text = new ServerTextChannelBuilder(event.getServer().get()).setName(name).setCategory(App.channelCategory(category)).create().join();
 
-                    event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsup:"));
-                }
-                case "" -> {
-                    EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle("Ошибка!")
-                            .setDescription("Неправильный тип или категория!")
-                            .setAuthor("Manager")
-                            .addField("Типы", "text - текстовый \n voice - голосовой")
-                            .addField("Категории", "Такой категории не существует!")
-                            .setColor(Color.RED)
-                            .setFooter("Vladimir Putin Company. 2021");
+                switch (type) {
+                    case "voice" -> {
+                        ServerVoiceChannel voice = new ServerVoiceChannelBuilder(event.getServer().get()).setName(name).setCategory(App.channelCategory(category)).create().join();
+                        event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsup:"));
+                    }
+                    case "text" -> {
+                        ServerTextChannel text = new ServerTextChannelBuilder(event.getServer().get()).setName(name).setCategory(App.channelCategory(category)).create().join();
+                        event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsup:"));
+                    }
+                    case "" -> {
+                        EmbedBuilder embed = new EmbedBuilder()
+                                .setTitle("Ошибка!")
+                                .setDescription("Неправильный тип или категория!")
+                                .setAuthor("Manager")
+                                .addField("Типы", "text - текстовый \n voice - голосовой")
+                                .addField("Категории", "Такой категории не существует!")
+                                .setColor(Color.RED)
+                                .setFooter("Vladimir Putin Company. 2021");
 
-                    event.getChannel().sendMessage(embed);
-                    event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsdown:"));
+                        event.getChannel().sendMessage(embed);
+                        event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsdown:"));
+                    }
                 }
+            } else {
+                return;
             }
         } else {
             return;
         }
+
     }
+
+    private static boolean hasRole(User user, Server server) {
+        var roles = user.getRoles(server);
+
+        return roles.stream().anyMatch(role -> role.getName().contains("Пользователь") || role.getName().contains("Основатель") || role.getName().contains("Заведующий"));
+    }
+
 }
