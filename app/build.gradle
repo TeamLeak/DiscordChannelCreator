@@ -19,6 +19,8 @@ dependencies {
 
     implementation 'org.javacord:javacord:3.3.2'
     implementation 'com.vdurmont:emoji-java:5.1.1'
+
+
 }
 
 
