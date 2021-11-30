@@ -34,11 +34,14 @@ public class CreateChannelCommand implements MessageCreateListener {
 
                 event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsup:"));
             }
+            case "" -> {
+                return;
+            }
             default -> {
                 event.getChannel().sendMessage(
                         "Неправильный тип! \n" +
-                        "text - текстовый \n" +
-                        "voice - голосовой");
+                                "text - текстовый \n" +
+                                "voice - голосовой");
                 event.getMessage().addReaction(EmojiParser.parseToUnicode(":thumbsdown:"));
             }
         }
